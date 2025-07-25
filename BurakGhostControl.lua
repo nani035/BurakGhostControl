@@ -1,4 +1,126 @@
--- BurakGhostControl.lua | Zysumi-style Floating UI by Burak
+-- BurakGhostControl | Zysumi-style Floating Menu 👻
+-- Author: Burak
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+
+-- Remote References
+local spawnPetRemote = ReplicatedStorage:FindFirstChild("SpawnPet")
+local spawnSeedRemote = ReplicatedStorage:FindFirstChild("SpawnSeed")
+local eggInfoRemote = ReplicatedStorage:FindFirstChild("EggInfo")
+local changeEggPetRemote = ReplicatedStorage:FindFirstChild("ChangeEggPet")
+
+-- Pet and Seed Lists
+local petOptions = {"Bee", "Butterfly", "Snail", "Dragon Fly"}
+local seedOptions = {"Sunflower Seed", "Pumpkin Seed", "Magic Bean"}
+
+-- Setup UI
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "BurakGhostUI"
+ScreenGui.ResetOnSpawn = false
+
+local ghostBtn = Instance.new("TextButton", ScreenGui)
+ghostBtn.Size = UDim2.new(0, 50, 0, 50)
+ghostBtn.Position = UDim2.new(0.015, 0, 0.4, 0)
+ghostBtn.Text = "👻"
+ghostBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ghostBtn.TextScaled = true
+ghostBtn.TextColor3 = Color3.new(1, 1, 1)
+ghostBtn.BackgroundTransparency = 0.3
+ghostBtn.BorderSizePixel = 0
+ghostBtn.Draggable = true
+
+-- Create Command Button
+local function makeButton(name, offsetY, callback)
+	local btn = Instance.new("TextButton", ScreenGui)
+	btn.Size = UDim2.new(0, 180, 0, 35)
+	btn.Position = UDim2.new(0.015, 60, 0.4 + offsetY, 0)
+	btn.Text = name
+	btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.TextScaled = true
+	btn.BorderSizePixel = 0
+	btn.Visible = false
+	btn.MouseButton1Click:Connect(callback)
+	return btn
+end
+
+-- Functionality
+local speedOn, jumpOn = false, false
+local function toggleSpeed()
+	speedOn = not speedOn
+	humanoid.WalkSpeed = speedOn and 50 or 16
+end
+
+local function toggleJump()
+	jumpOn = not jumpOn
+	humanoid.JumpPower = jumpOn and 120 or 50
+end
+
+local function spawnChosenPet()
+	local petName = petOptions[math.random(1, #petOptions)]
+	local age = math.random(1, 80)
+	local weight = math.random(1, 20)
+	if spawnPetRemote then
+		spawnPetRemote:FireServer(petName, age, weight)
+	end
+end
+
+local function spawnChosenSeed()
+	local seedName = seedOptions[math.random(1, #seedOptions)]
+	if spawnSeedRemote then
+		spawnSeedRemote:FireServer(seedName)
+	end
+end
+
+local function showEggInfo()
+	if eggInfoRemote then
+		local result = eggInfoRemote:InvokeServer()
+		game.StarterGui:SetCore("SendNotification", {
+			Title = "🥚 Egg Info",
+			Text = "Type: " .. result.Type .. "\nReady: " .. tostring(result.Ready),
+			Duration = 4
+		})
+	end
+end
+
+local function changeEgg()
+	local newPet = petOptions[math.random(1, #petOptions)]
+	if changeEggPetRemote then
+		changeEggPetRemote:FireServer(newPet)
+	end
+end
+
+-- Buttons
+local btnSpeed = makeButton("⚡ Toggle Speed", 0.00, toggleSpeed)
+local btnJump = makeButton("🦘 Toggle Jump", 0.07, toggleJump)
+local btnPet = makeButton("🐾 Spawn Pet (Pick)", 0.14, spawnChosenPet)
+local btnSeed = makeButton("🌱 Spawn Seed (Pick)", 0.21, spawnChosenSeed)
+local btnEgg = makeButton("🥚 Egg Info", 0.28, showEggInfo)
+local btnChange = makeButton("🧬 Change Hatch", 0.35, changeEgg)
+
+-- Toggle visibility
+local toggled = false
+ghostBtn.MouseButton1Click:Connect(function()
+	toggled = not toggled
+	btnSpeed.Visible = toggled
+	btnJump.Visible = toggled
+	btnPet.Visible = toggled
+	btnSeed.Visible = toggled
+	btnEgg.Visible = toggled
+	btnChange.Visible = toggled
+end)
+
+-- Reapply after respawn
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+	char = newChar
+	humanoid = char:WaitForChild("Humanoid")
+	if speedOn then humanoid.WalkSpeed = 50 end
+	if jumpOn then humanoid.JumpPower = 120 end
+end)-- BurakGhostControl.lua | Zysumi-style Floating UI by Burak
 
 local Players = game:GetService("Players") local ReplicatedStorage = game:GetService("ReplicatedStorage") local LocalPlayer = Players.LocalPlayer local StarterGui = game:GetService("StarterGui")
 
