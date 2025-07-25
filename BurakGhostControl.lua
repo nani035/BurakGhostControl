@@ -1,4 +1,102 @@
--- BurakGhostUI.lua | Floating 👻 Control | Made by Burak
+-- BurakGhostControl.lua | 👻 Floating Manual Pet & Seed Controller
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+--⚙️ SETTINGS:
+local ghostLogo = "👻" -- You can change this to 🐱, 🐉, 🧠 etc.
+local petOptions = {"Bee", "Butterfly", "Snail", "Dragon Fly"}
+local seedOptions = {"Sunflower Seed", "Pumpkin Seed", "Magic Bean"}
+local hatchChangeOptions = {"Bee", "Butterfly", "Snail"}
+
+--🧠 UI SETUP (Floating ghost logo):
+local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+screenGui.Name = "BurakGhostControlUI"
+local ghostButton = Instance.new("TextButton", screenGui)
+ghostButton.Size = UDim2.new(0, 50, 0, 50)
+ghostButton.Position = UDim2.new(0.9, 0, 0.4, 0)
+ghostButton.Text = ghostLogo
+ghostButton.BackgroundTransparency = 0.3
+ghostButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+ghostButton.TextColor3 = Color3.new(1, 1, 1)
+ghostButton.TextScaled = true
+ghostButton.Draggable = true
+
+--📦 Remotes (Adjust these if needed):
+local spawnPetRemote = ReplicatedStorage:WaitForChild("SpawnPet")
+local spawnSeedRemote = ReplicatedStorage:WaitForChild("SpawnSeed")
+local eggInfoRemote = ReplicatedStorage:WaitForChild("EggInfo")
+local changeEggPetRemote = ReplicatedStorage:WaitForChild("ChangeEggPet")
+
+--⚡️ Speed & Jump toggle:
+local function applyStats()
+	local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local hum = char:WaitForChild("Humanoid")
+	hum.WalkSpeed = 50
+	hum.JumpPower = 120
+end
+LocalPlayer.CharacterAdded:Connect(function() task.wait(1) applyStats() end)
+if LocalPlayer.Character then applyStats() end
+
+--📍 Popup UI function:
+local function notify(title, content)
+	game.StarterGui:SetCore("SendNotification", {
+		Title = title,
+		Text = content,
+		Duration = 4
+	})
+end
+
+--🎯 Select and spawn ONE pet:
+local function choosePet()
+	local petName = petOptions[math.random(1, #petOptions)]
+	local age = math.random(1, 100)
+	local weight = math.random(1, 20)
+	spawnPetRemote:FireServer(petName, age, weight)
+	notify("Pet Spawned", petName .. " | Age: " .. age .. ", Weight: " .. weight)
+end
+
+--🌱 Spawn ONE seed:
+local function chooseSeed()
+	local seedName = seedOptions[math.random(1, #seedOptions)]
+	spawnSeedRemote:FireServer(seedName)
+	notify("Seed Spawned", seedName)
+end
+
+--🥚 Egg info display:
+local function showEggInfo()
+	local result = eggInfoRemote:InvokeServer()
+	notify("Egg Info", "Type: " .. result.Type .. "\nReady: " .. tostring(result.Ready))
+end
+
+--🧬 Change the pet from hatching egg:
+local function changeHatchResult()
+	local newPet = hatchChangeOptions[math.random(1, #hatchChangeOptions)]
+	changeEggPetRemote:FireServer(newPet)
+	notify("Egg Changed", "New Hatch: " .. newPet)
+end
+
+--🎮 Manual ghost button logic:
+local lastClick = 0
+ghostButton.MouseButton1Click:Connect(function()
+	if tick() - lastClick < 1 then return end
+	lastClick = tick()
+
+	local action = math.random(1, 5)
+	if action == 1 then
+		choosePet()
+	elseif action == 2 then
+		chooseSeed()
+	elseif action == 3 then
+		showEggInfo()
+	elseif action == 4 then
+		changeHatchResult()
+	else
+		applyStats()
+		notify("Boost Applied", "Speed & Jump boosted!")
+	end
+end)-- BurakGhostUI.lua | Floating 👻 Control | Made by Burak
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
