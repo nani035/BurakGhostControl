@@ -1,3 +1,41 @@
+-- BurakGhostControl.lua | Zysumi-style Floating UI by Burak
+
+local Players = game:GetService("Players") local ReplicatedStorage = game:GetService("ReplicatedStorage") local LocalPlayer = Players.LocalPlayer local StarterGui = game:GetService("StarterGui")
+
+local ScreenGui = Instance.new("ScreenGui") ScreenGui.Name = "BurakGhostUI" ScreenGui.ResetOnSpawn = false ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local ghostIcon = Instance.new("ImageButton") ghostIcon.Size = UDim2.new(0, 50, 0, 50) ghostIcon.Position = UDim2.new(0, 10, 0.5, -25) ghostIcon.BackgroundTransparency = 1 ghostIcon.Image = "rbxassetid://15750610296" -- 👻 ghost icon ghostIcon.Parent = ScreenGui
+
+local frame = Instance.new("Frame") frame.Size = UDim2.new(0, 250, 0, 300) frame.Position = UDim2.new(0, 70, 0.5, -150) frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) frame.Visible = false frame.Parent = ScreenGui
+
+local uicorner = Instance.new("UICorner", frame) uicorner.CornerRadius = UDim.new(0, 12)
+
+local title = Instance.new("TextLabel") title.Size = UDim2.new(1, 0, 0, 30) title.BackgroundTransparency = 1 title.Text = "Burak Ghost Menu 👻" title.Font = Enum.Font.GothamBold title.TextColor3 = Color3.fromRGB(255, 255, 255) title.TextScaled = true title.Parent = frame
+
+-- Toggle UI local open = false ghostIcon.MouseButton1Click:Connect(function() open = not open frame.Visible = open end)
+
+-- Buttons local function makeButton(text, order, callback) local button = Instance.new("TextButton") button.Size = UDim2.new(1, -20, 0, 30) button.Position = UDim2.new(0, 10, 0, 35 + (order * 35)) button.BackgroundColor3 = Color3.fromRGB(45, 45, 45) button.Text = text button.Font = Enum.Font.Gotham button.TextColor3 = Color3.fromRGB(255, 255, 255) button.TextScaled = true button.Parent = frame
+
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+
+button.MouseButton1Click:Connect(callback)
+
+end
+
+-- Speed makeButton("Toggle Speed (50)", 0, function() local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait() local hum = char:FindFirstChildOfClass("Humanoid") if hum then hum.WalkSpeed = hum.WalkSpeed == 16 and 50 or 16 end end)
+
+-- Jump makeButton("Toggle Jump (120)", 1, function() local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait() local hum = char:FindFirstChildOfClass("Humanoid") if hum then hum.JumpPower = hum.JumpPower == 50 and 120 or 50 end end)
+
+-- Seed picker placeholder makeButton("Spawn Selected Seed", 2, function() print("[BurakSpawner] Seed spawn requested") end)
+
+-- Pet picker placeholder makeButton("Spawn Pet (Pick, Age, Weight)", 3, function() print("[BurakSpawner] Pet spawn requested") end)
+
+-- Egg info placeholder makeButton("Show Egg Info", 4, function() print("[BurakSpawner] Egg Info displayed") end)
+
+-- Change hatching egg placeholder makeButton("Change Hatching Egg", 5, function() print("[BurakSpawner] Hatching egg changed") end)
+
+print("[BurakGhostControl] Loaded!")
+
 -- BurakGhostControl.lua | 👻 Floating Manual Pet & Seed Controller
 
 local Players = game:GetService("Players")
